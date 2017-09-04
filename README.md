@@ -440,13 +440,13 @@ The optional arguments for this example are:
 To download the example, please run the following command.
 
 ```
-go get github.com/.../trthrest/main
+go get github.com/TR-API-Samples/Article.TRTH.Go.REST.trthrest/main
 ```
 
 The example can be run with the following command.
 
 ```
-go run github.com/.../trthrest/main/TickHistoryMarketDepthEx.go -aws -n 4 -X 
+go run github.com/TR-API-Samples/Article.TRTH.Go.REST.trthrest/main/TickHistoryMarketDepthEx.go -aws -n 4 -X 
 ```
 
 The above command runs the example to download the result file from AWS with four concurrent connections and enable HTTP tracing.
