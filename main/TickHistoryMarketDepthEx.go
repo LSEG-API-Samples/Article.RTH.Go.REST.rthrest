@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/TR-API-Samples/Article.TRTH.Go.REST.trthrest"
 	"github.com/howeyc/gopass"
-	"github.com/jirapongse/trthrest"
 )
 
 //Enter username and password here
