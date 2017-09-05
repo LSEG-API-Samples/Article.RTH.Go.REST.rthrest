@@ -2,23 +2,23 @@
 
 ## Introduction
 
-Thomson Reuters Tick History (TRTH) is an Internet-hosted product on the DataScope Select platform that provides SOAP-based and a REST API for unparalleled access to historical high frequency data across global asset classes dating to 1996. However a legacy SOAP-based API is also available, and is scheduled to be sunset. Therefore client who still uses SOAP-based API may need to migrate their application to use REST API instead.
+Thomson Reuters Tick History (TRTH) is an Internet-hosted product on the DataScope Select platform that provides SOAP-based and a REST API for unparalleled access to historical high frequency data across global asset classes dating to 1996. However a legacy SOAP-based API is also available, and is scheduled to be sunset. Therefore client who still uses SOAP-based API may need to upgrade their application to use REST API instead.
 
-This article demonstrates problems and solutions that developers should aware when using TRTH V2 On Demand data extraction with Go programming language. It uses Tick History Market Depth On-Demand data extraction as an example to demonstrate the usage and solutions. However, the methods mentioned in this article can be applied to other types of data extractions.
+This article demonstrates problems and solutions that developers should aware when using TRTH V2 On-Demand data extraction with Go programming language. It uses Tick History Market Depth On-Demand data extraction as an example to demonstrate the usage and solutions. However, the methods mentioned in this article can be applied to other types of data extractions.
 
 ## Prerequisite
 
-The following knowledges are required to follow this article.
+The following knowledge is required to follow this article.
 
 * You must know how to use On-Demand extraction in TRTH V2. This article doesn't explain TRTH V2 REST API On Demand data extraction request in detail. Fortunately, there is a [REST API Tutorial 3: On Demand Data extraction workflow](https://developers.thomsonreuters.com/thomson-reuters-tick-history-trth/thomson-reuters-tick-history-trth-rest-api/learning?content=11307&type=learning_material_item) tutorial available in the Developer Community which thoroughly explains On Demand data extraction
 
-* You must have basic knowledge of Go programing language. This article doesn't cover the installation, settings, and usage of Go programming language. You can refer to the official [Go Programming Language Website](https://golang.org/) for more information
+* You must have basic knowledge of Go programming language. This article doesn't cover the installation, settings, and usage of Go programming language. You can refer to the official [Go Programming Language Website](https://golang.org/) for more information
 
 ## Overview
 
 Go is an open source project under a BSD-style license developed by a team at Google in 2007 and many contributors from the open source community. Its binary distributions are available for Linux, Max OS X, Windows, and more. Go is a statically typed and compiled language with a simple syntax. It features garbage collection, concurrency, type safety and large standard library.
 
-Developers can use Go programing language to consume Tick History data via TRTH V2 REST API. This article lists several problems and solutions which developers may find during development. The list of problems are:
+Developers can use Go programming language to consume Tick History data via TRTH V2 REST API. This article lists several problems and solutions which developers may find during development. The problems mentioned in this article include:
 
 * Encode and decode JSON object
 * Encode enumeration
@@ -59,7 +59,7 @@ To decode a JSON string, **json.Unmarshal** function can be used.
 		fmt.Printf("%s: %v\n", k, v)
 	}
 ```
-The above code defines a JSON string in a string variable. Then, it calls the json.Unmarshal function to decode a string to a map. After that, it prints keys and values in the map.
+The above code defines a JSON string in a string variable. Then, it calls the **json.Unmarshal** function to decode a string to a map. After that, it prints keys and values in the map.
 ```
 b: 2
 field1: value1
@@ -91,7 +91,7 @@ type RawExtractionResult struct {
 ``` 
 These types will be encoded and decoded as JSON objects. Each field becomes a member of the object, using the field name as the object key.
 
-JSON object in the HTTP request and response of TRTH V2 REST API contains "@data.type" field which defines a type name of OData. 
+JSON object in the HTTP request and response of TRTH V2 REST API contains **@data.type** field which defines a type name of OData. 
 ```
 {
     "ExtractionRequest":{
@@ -101,13 +101,13 @@ JSON object in the HTTP request and response of TRTH V2 REST API contains "@data
     }
 }
 ```
-However, **@data.type** is an invalid field name in Go programming language. To solve this issue, the **json** key is used in the **Metadata** field's tag to customize the field name for JSON object.
+However, **@data.type** is an invalid field name in Go programming language. To solve this issue, the **json** tag is used in the **Metadata** field's tag to customize the field name for JSON object.
 ```
 Metadata string `json:"@odata.context,omitempty"`
 ```
 The **omitempty** option specifies that the field should be omitted from the encoding if the field has an empty value, defined as false, 0, a nil pointer, a nil interface value, and any empty array, slice, map, or string.
 
-The value of **@odata.type** is unique and constant for each request type. It is inconvenient and prone to error, if this value will be set by users. Therefore, a new field tag (**odata**) is defined. Its value is the type name used in the **@odata.type** field.
+The value of **@odata.type** is unique and constant for each request type. For example, the value of **@odata.type** field for TickHistoryMarketDepthExtractionRequest is **#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.TickHistoryMarketDepthExtractionRequest**. Therefore, it is inconvenient and prone to error, if this value will be set by users. Therefore, a new field tag (**odata**) is defined for the constant type name used in this field so the user doesn't need to assign the Odaya type name when using the TickHistoryMarketDepthExtractionRequest type.
 
 ```
 type TickHistoryMarketDepthExtractionRequest struct {	
@@ -115,7 +115,7 @@ type TickHistoryMarketDepthExtractionRequest struct {
     ...
 }
 ```
-To use this tag, the custom JSON marshaller is defined for this type.
+To use this **odata** tag, the custom JSON marshaller is defined for this type.
 ```
 func (r TickHistoryMarketDepthExtractionRequest) MarshalJSON() ([]byte, error) {
 	type _TickHistoryMarketDepthExtractionRequest TickHistoryMarketDepthExtractionRequest
@@ -127,7 +127,7 @@ func (r TickHistoryMarketDepthExtractionRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(_TickHistoryMarketDepthExtractionRequest(r))
 }
 ```
-This marshaller uses reflection to get the value of **odata** tag, and set the value to **Metadata** field. It also defines a new type with the same type. After setting the value in the **Metadata** field, it calls the **json.Marshal** function with this new type. Thus, the default marshaller of this new type will be used to marshal the data. 
+This marshaller uses reflection to get the value of **odata** tag, and set the value to **Metadata** field. It also defines a new type (**_TickHistoryMarketDepthExtractionRequest**) for the marshaled type. After setting the value in the **Metadata** field, it calls the **json.Marshal** function with this new type. Thus, the default marshaller of this new type will be used to marshal the data. Othwerwise, this custom JSON marshaller will be called recursively.
 
 The following code shows how to use this user-defined type and marshaller to encode JSON object.
 
@@ -212,7 +212,9 @@ The above code is from the example which shows how to use **TickHistoryMarketDep
     }
 }
 ```
-To decode the returned JSON object, **json.Unmarshal** function is used.
+The JSON object shows that the Metdata field in **TickHistoryMarketDepthExtractionRequest** type is encoded as a **@odata.type** field with the value specified in the **odata** tag.
+
+After the HTTP request is sent, the HTTP response will retrun with the JSON object. To decode the returned JSON object, **json.Unmarshal** function is used.
 
 ```
 extractRawResult := &trthrest.RawExtractionResult{}
@@ -243,7 +245,9 @@ The above code decoded the following JSON object to **RawExtractionResults** typ
    ]
 }
 ```
-In conclusion, using a type to encode and decode JSON object is effective and flexible. It is also usefule when using with IDE that supports Intellisense, such as Visual Studio Code. Moreover, the user-defined types can be reused in other examples. 
+The value of **@odata.type** field in JSON object is decoded to Metadata field in **RawExtractionResults** type.
+
+In conclusion, using a type to encode and decode JSON object is effective and flexible. It is also useful when using with IDE that supports Intellisense, such as Visual Studio Code. Moreover, the user-defined types can be reused by other examples. 
 
 ## Encode enumeration
 TRTH V2 REST API defines enumerations used in JSON object, such as **TickHistoryExtractByMode**, **TickHistoryMarketDepthViewOptions**, and **ReportDateRangeType**. In JSON object, these enumerations are encoded as strings. For ease of use, enumerations can be defined in Go programming language which can be used when constructing the request message.
@@ -261,12 +265,14 @@ const (
 ```
 The above code defines an enumeration type called **TickHistoryMarketDepthViewOptions** and all enumeration values of this type.
 
-The below code shows how to use this enumeration in the example.
+The following shows how to use this enumeration.
 
 ```
 request.Condition.View = trthrest.ViewOptionsNormalizedLL2Enum
 ```
-However, in JSON object, these enumeration fields are encoded as strings. To encode each enumeration, an array of string and custom text marshaller are defined.
+Condition.View is **TickHistoryMarketDepthViewOptions** type and its value is set to **ViewOptionsNormalizedLL2Enum**. 
+
+However, in JSON object, these enumeration fields are encoded as strings, not integers. To encode each enumeration, an array of string and custom text marshaller are defined.
 
 ```
 var tickHistoryMarketDepthViewOptions = [...]string{
@@ -281,7 +287,7 @@ func (d TickHistoryMarketDepthViewOptions) MarshalText() ([]byte, error) {
 	return []byte(tickHistoryMarketDepthViewOptions[d]), nil
 }
 ```
-The above code defines an array of strings called **tickHistoryMarketDepthViewOptions** which contains a string for each enumeration value.  This array is used by the custom text marshaller of **TickHistoryMarketDepthViewOptions** type when encoding the enumeration type to JSON object. For example, if the application sets the value of **TickHistoryMarketDepthViewOptions** type to **ViewOptionsNormalizedLL2Enum (4)**, when encoding **TickHistoryMarketDepthViewOptions** type, the custom text marshaller of this type will return a **"NormalizedLL2"** string which is the string at the fourth index in the array. 
+The above code defines an array of strings called **tickHistoryMarketDepthViewOptions** which contains a string for each enumeration value.  This array is used by the custom text marshaller of **TickHistoryMarketDepthViewOptions** type while encoding its value to JSON object. For example, if the application sets the value of **TickHistoryMarketDepthViewOptions** type to **ViewOptionsNormalizedLL2Enum (4)**, when encoding **TickHistoryMarketDepthViewOptions** type to JSON object, the custom text marshaller of this type will return a **"NormalizedLL2"** string which is the string at the fourth index in the array and this string will be used by the JSON marshaller for encoding.
 
 ```
 "Condition":{
@@ -291,15 +297,15 @@ The above code defines an array of strings called **tickHistoryMarketDepthViewOp
 
 ## Concurrently download a gzip file
 
-The result file of **ExtractRaw** extraction is in **.csv.gz** format and the HTTP response when downloading the result file typically contains **Content-Encoding: gzip** in the header. With this header, the **net/http** library in Go programming language typically decompresses the gzip file and then returns the csv to the application. To download the raw gzip file, the decommpession must be disable by using the following code.
+The result file of **ExtractRaw** extraction is in **.csv.gz** format and the HTTP response when downloading the result file typically contains **Content-Encoding: gzip** in the header. With this header, the **net/http** library in Go programming language typically decompresses the gzip file and then returns the csv to the application. To download the raw gzip file, the decommpression must be disabled by using the following code.
 ```
 tr := &http.Transport{
     DisableCompression: true,    
 }
 ```
-The size of gzip file could be huge depending on the number of instruments or the range of periods in the extraction request. According to TRTH V2 REST API User Guide, download speed is limited to 1 MB/s for each connection. Therefore, downloading the huge gzip file can take more than hours with a single connection. 
+After extraction, the size of gzip file could be huge depending on the number of instruments or the range of periods in the extraction request. According to TRTH V2 REST API User Guide, download speed is limited to 1 MB/s for each connection. Therefore, downloading the huge gzip file can take more than several hours with a single connection. 
 
-To speed up the download, the file can download concurrently with multiple connections. Each connection will download a specific range of the file by defining a download range in the HTTP request header. 
+To speed up the download, the file can download concurrently with multiple connections. Each connection will download a specific range of a file by defining a range (offset) in the HTTP request header. 
 
 ```
 Range: bytes=0-3079590
@@ -314,7 +320,7 @@ Content-Range: bytes 0-3079590/12318367
 Content-Type: text/plain
 Date: Sun, 03 Sep 2017 07:34:05 GMT
 ```
-However, in order to download file concurrently, the size of result file must be known. The example in this article get the size of result file from the **Extraction ID **appearing in the **Notes** field when the job is completed. 
+However, in order to download file concurrently, the size of result file must be known. There are several ways to get the size of the extracted file. The example in this article shows the way to get the size of result file from the **Extraction ID** appearing in the **Notes** field when the job is completed. 
 
 ```
 {
@@ -339,12 +345,12 @@ However, in order to download file concurrently, the size of result file must be
   ]
 }
 ```
-From the above response, the Extraction ID in the Notes fields is 2000000002049332. To get the file description, the following request is used.
+From the above response, the **Extraction ID** in the **Notes** field is 2000000002049332. To get the file description, the following HTTP GET request is used.
 
 ```
 GET /RestApi/v1/Extractions/ReportExtractions('2000000002049332')/FullFile
 ```
-The response for this HTTP GET request is the description of the data file.
+The response for this request is the description of the data file.
 ```
 {
   "@odata.context": "https://hosted.datascopeapi.reuters.com/RestApi/v1/$metadata#ExtractedFiles/$entity",
@@ -358,7 +364,7 @@ The response for this HTTP GET request is the description of the data file.
   "Size": 12318367
 }
 ```
-The **Size** field in the response contains the size of file. After that, the download byte offset can be calculated for each connection by dividing the size of file by the number of connections. For example, if the above file is downloaded concurrently with four connections, the download size for each connection will be 3079591 bytes (12318367 / 4) and the download byte offets for four connections will be:
+The **Size** field in the response contains the size of file. Then, the download byte offset can be calculated for each connection by dividing the size of file by the number of connections. For example, if the above file is downloaded concurrently with four connections, the download size for each connection will be 3079591 bytes (12318367 / 4) and the download ranges for four connections will be:
 
 ```
 Connection 1: Range: Bytes=0-3079590
@@ -370,7 +376,7 @@ The fourth connection will start downloading the file starting at 9238773 offset
 
 The following test results compare the download times between a single connection and four connections.
 
-|No.|Total download time (secs) with a single connection|Total download time (secs) with four concurrent connections|
+|No.|Total download time (seconds) with a single connection|Total download time (seconds) with four concurrent connections|
 | ------------- |-------------|-----|
 |1|43.832|24.675|
 |2|111.683|26.654|
@@ -383,15 +389,13 @@ The following test results compare the download times between a single connectio
 |9|56.865|19.841|
 |10|55.628|45.135|
 
-After testing ten times, downloading a file with four concurrent connections is faster than download a file with a single connection.
-
-The test results may vary with different machines.
+After testing ten times, downloading a file with four concurrent connections is faster than download a file with a single connection. The test results may vary according to machine and netowrk performance.
 
 ## Download a gzip file from Amazon Web Services
 
-In addition to download extracted files from DSS server, the application has an option to download files from the AWS (Amazon Web Services) cloud. This feature is available for VBD (Venue by Day) data, Tick History Time and Sales, Tick History Market Depth, Tick History Intraday Summaries, and Tick History Raw reports.
+In addition to download extracted files directly from DSS server, the application can download the files faster by retrieving them directly from the Amazon Web Services (AWS) cloud in which they are hosted. This feature is available for VBD (Venue by Day) data, Tick History Time and Sales, Tick History Market Depth, Tick History Intraday Summaries, and Tick History Raw reports.
 
-To use this feature, the application must include the HTTP header field **X-Direct-Download: true** in the request. If the file is availble on AWS, the status code of HTTP response will be **302 Found** with the new AWS URL in the **Location** HTTP header field which is the pre-signed URL to get data directly from AWS. 
+To use this feature, the application must include the HTTP header **X-Direct-Download: true** in the request. If the file is available on AWS, the status code of HTTP response will be **302 Found** with the new AWS URL in the **Location** HTTP header field. The new URL is the pre-signed URL to get data directly from AWS. 
 
 ```
 HTTP/1.1 302 Found
@@ -403,7 +407,7 @@ Location: https://s3.amazonaws.com/tickhistory.query.production.hdc-results/xxx/
 
 Then, the application can use this new AWS URL to download the file.
 
-However, when retrieving the HTTP status code 302, the **http** library in Go programming language will automatically re-request to the new URL with the same HTTP headers which have fields for TRTH V2 REST API. This causes AWS returning **403 Forbidden** status code.
+However, when retrieving the HTTP status code 302, the **http** library in Go programming language will automatically redirect to the new URL with the same HTTP headers which have fields for TRTH V2 REST API. This causes AWS returning **403 Forbidden** status code.
 
 To avoid this issue, the application should disable this automatic redirect by using the following code.
 
@@ -415,10 +419,10 @@ client := &http.Client{
     },
 }
 ```
-Then, the application can add its own HTTP headers in the request. Concurrent downloads mentioned in the previous section can also be used with AWS by specifing **Range** header in the request.
+Then, the application can remove TRTH V2 headers and optionally add its own HTTP headers in the request. Concurrent downloads mentioned in the previous section can also be used with AWS by specifying **Range** header in the request.
 
-## Get and Run the Example
-TickHistoryMarketDepthEx.go is implemented to demonstrate methods mentioned in this article. It uses ExtractRaw endpoint to send TickHistoryMarketDepthExtractionRequest to extract normallized legacy level 2 data of IBM.N from 1 Jul 2017 to 23 Aug 2017. All settings are harded code. This example supports the following features:
+## Go Get and Run the Example
+TickHistoryMarketDepthEx.go is implemented to demonstrate methods mentioned in this article. It uses **ExtractRaw** endpoint to send **TickHistoryMarketDepthExtractionRequest** to extract normallized legacy level 2 data of IBM.N from 1 Jul 2017 to 23 Aug 2017. All settings are hard-coded. This example supports the following features:
 * Concurrent Downloads
 * Download a file from AWS
 * Request and response tracing
