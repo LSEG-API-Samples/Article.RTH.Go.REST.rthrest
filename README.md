@@ -107,7 +107,7 @@ Metadata string `json:"@odata.context,omitempty"`
 ```
 The **omitempty** option specifies that the field should be omitted from the encoding if the field has an empty value, defined as false, 0, a nil pointer, a nil interface value, and any empty array, slice, map, or string.
 
-The value of **@odata.type** is unique and constant for each request type. For example, the value of **@odata.type** field for **TickHistoryMarketDepthExtractionRequest** is **#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.TickHistoryMarketDepthExtractionRequest**. Therefore, it is inconvenient and prone to error, if this value will be set by users. Therefore, a custom field tag (**odata**) is defined for the this **Metadata** field so the user doesn't need to specify its value when using the TickHistoryMarketDepthExtractionRequest type.
+The value of **@odata.type** is unique and constant for each request type. For example, the value of **@odata.type** field for **TickHistoryMarketDepthExtractionRequest** is **#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.TickHistoryMarketDepthExtractionRequest**. Therefore, it is inconvenient and prone to error, if this value will be set by users. Therefore, a custom field tag (**odata**) is defined for this **Metadata** field so the user doesn't need to specify its value when using the TickHistoryMarketDepthExtractionRequest type.
 
 ```
 type TickHistoryMarketDepthExtractionRequest struct {	
@@ -301,7 +301,7 @@ The above code defines an array of strings called **tickHistoryMarketDepthViewOp
 
 ## Concurrently download a gzip file
 
-The result file of **ExtractRaw** extraction is in **.csv.gz** format and the HTTP response when downloading the result file typically contains **Content-Encoding: gzip** in the header. With this header, the **net/http** library in Go programming language typically decompresses the gzip file and then returns the csv to the application. To download the raw gzip file, the decommpression must be disabled by using the following code.
+The result file of **ExtractRaw** extraction is in **.csv.gz** format and the HTTP response when downloading the result file typically contains **Content-Encoding: gzip** in the header. With this header, the **net/http** library in Go programming language typically decompresses the gzip file and then returns the csv to the application. To download the raw gzip file, the decompression must be disabled by using the following code.
 ```
 tr := &http.Transport{
     DisableCompression: true,    
@@ -326,7 +326,7 @@ Date: Sun, 03 Sep 2017 07:34:05 GMT
 ```
 The response also indicates the content size, starting, and ending offset. 
 
-However, in order to download file concurrently, the staring and ending offset of each download connection must be calculated so the size of result file must be known. There are several ways to get the size of the extracted file. The example in this article shows the way to get the size of result file by using the **Extraction ID** appearing in the **Notes** field when the job is completed. 
+However, in order to download file concurrently, the starting and ending offset of each download connection must be calculated so the size of result file must be known. There are several ways to get the size of the extracted file. The example in this article shows the way to get the size of result file by using the **Extraction ID** appearing in the **Notes** field when the job is completed. 
 
 ```
 {
@@ -370,7 +370,7 @@ The response for this request is the description of the data file.
   "Size": 12318367
 }
 ```
-The **Size** field in the response contains the size of file. Then, the download byte offset can be calculated for each connection by dividing the size of file by the number of connections. For example, if the above file is downloaded concurrently with four connections, the download size for each connection will be 3079591 bytes (12318367 / 4) and the download offets for four connections will be:
+The **Size** field in the response contains the size of file. Then, the download byte offset can be calculated for each connection by dividing the size of file by the number of connections. For example, if the above file is downloaded concurrently with four connections, the download size for each connection will be 3079591 bytes (12318367 / 4) and the download offsets for four connections will be:
 
 ```
 Connection 1: Range: Bytes=0-3079590
@@ -395,7 +395,7 @@ The following test results compare the download times between a single connectio
 |9|56.865|19.841|
 |10|55.628|45.135|
 
-After testing ten times, downloading a file with four concurrent connections is faster than download a file with a single connection. The test results may vary according to machine and netowrk performance.
+After testing ten times, downloading a file with four concurrent connections is faster than download a file with a single connection. The test results may vary according to machine and network performance.
 
 ## Download a gzip file from Amazon Web Services
 
@@ -428,7 +428,7 @@ client := &http.Client{
 Then, the application can remove TRTH V2 headers and optionally add its own HTTP headers in the request. Concurrent downloads mentioned in the previous section can also be used with AWS by specifying **Range** header in the request.
 
 ## Go Get and Run the Example
-**TickHistoryMarketDepthEx.go** is implemented to demonstrate methods mentioned in this article. It uses **ExtractRaw** endpoint to send **TickHistoryMarketDepthExtractionRequest** to extract normallized legacy level 2 data of IBM.N from 1 Jul 2017 to 23 Aug 2017. All settings are hard-coded. This example supports the following features:
+**TickHistoryMarketDepthEx.go** is implemented to demonstrate methods mentioned in this article. It uses **ExtractRaw** endpoint to send **TickHistoryMarketDepthExtractionRequest** to extract normalized legacy level 2 data of IBM.N from 1 Jul 2017 to 23 Aug 2017. All settings are hard-coded. This example supports the following features:
 * Concurrent Downloads
 * Download a file from AWS
 * Request and response tracing
