@@ -468,10 +468,7 @@ Enter DSS Password: **********
 2017/09/05 15:23:47 Step 4: Get File information
 2017/09/05 15:23:48 File: _OnD_0x05dc5346defb3036.csv.gz, Size: 12318367
 2017/09/05 15:23:48 Step 5: Get AWS URL
-2017/09/05 15:23:49 AWS: https://s3.amazonaws.com/tickhistory.query.production.hdc-results/E72B426B7E554FA48E15D
-96B60162A93/data/merged/merged.csv.gz?AWSAccessKeyId=AKIAJVAI4XORJURKYMEA&Expires=1504621429&response-content-di
-sposition=attachment%3B%20filename%3D_OnD_0x05dc5346defb3036.csv.gz&Signature=SGmq6VsvXQPvW7MiHMOjuNj8aJI%3D&x-a
-mz-request-payer=requester
+2017/09/05 15:23:49 AWS: https://s3.amazonaws.com/tickhistory.query.production.hdc-results/E72B426B7E554FA48E15D96B60162A93/data/merged/merged.csv.gz?AWSAccessKeyId=xxx&Expires=1504621429&response-content-disposition=attachment%3B%20filename%3D_OnD_0x05dc5346defb3036.csv.gz&Signature=xxx&x-amz-request-payer=requester
 2017/09/05 15:23:49 Step 6: Concurrent Download: _OnD_0x05dc5346defb3036.csv.gz, Size: 12318367, Connection: 4
 2017/09/05 15:23:49 ConcurrentDownload: _OnD_0x05dc5346defb3036.csv.gz, conn=4
 2017/09/05 15:23:49 Part 1: 0 - 3079590
