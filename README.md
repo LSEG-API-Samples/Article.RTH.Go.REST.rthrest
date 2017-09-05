@@ -35,14 +35,14 @@ JSON is a text format so the application can directly construct a JSON string fo
 JSON is also a key and value pair data so **map[string]interface{}** can be used with **json.Marshal** and **json.Unmarshal** functions in the **encoding/json** library to encode and decode JSON data. 
 
 ```
-	jsonMap := map[string]interface{}{
-		"field1": "value1",
-		"field2": 2,
-		"a":      "1",
-		"b":      2,
-	}
-	jsonByte, _ := json.Marshal(jsonMap)
-	fmt.Println(string(jsonByte))
+jsonMap := map[string]interface{}{
+    "field1": "value1",
+    "field2": 2,
+    "a":      "1",
+    "b":      2,
+}
+jsonByte, _ := json.Marshal(jsonMap)
+fmt.Println(string(jsonByte))
 ```
 The above code uses **map[string]interface{}** to store key value pair data. Then, it uses **json.Marshal** function to encode the map to JSON byte array. After that, it prints the encoded JSON string. 
 
@@ -52,12 +52,12 @@ The above code uses **map[string]interface{}** to store key value pair data. The
 To decode a JSON string, **json.Unmarshal** function can be used. 
 
 ```
-	var jsonMap map[string]interface{}
-	jsonStr := `{"field1":"value1","field2":2,"a":"1","b":2}`
-	json.Unmarshal([]byte(jsonStr), &jsonMap)
-	for k, v := range jsonMap {
-		fmt.Printf("%s: %v\n", k, v)
-	}
+var jsonMap map[string]interface{}
+jsonStr := `{"field1":"value1","field2":2,"a":"1","b":2}`
+json.Unmarshal([]byte(jsonStr), &jsonMap)
+for k, v := range jsonMap {
+    fmt.Printf("%s: %v\n", k, v)
+}
 ```
 The above code defines a JSON string in a string variable. Then, it calls the **json.Unmarshal** function to decode a string to a map. After that, it prints keys and values in the map.
 ```
@@ -450,10 +450,49 @@ go get github.com/TR-API-Samples/Article.TRTH.Go.REST.trthrest/main
 The example can be run with the following command.
 
 ```
-go run github.com/TR-API-Samples/Article.TRTH.Go.REST.trthrest/main/TickHistoryMarketDepthEx.go -aws -n 4 -X 
+go run github.com/TR-API-Samples/Article.TRTH.Go.REST.trthrest/main/TickHistoryMarketDepthEx.go -aws -n 4
 ```
 
-The above command runs the example to download the result file from AWS with four concurrent connections and enable HTTP tracing.
+The above command runs the example to download the result file from AWS with four concurrent connections. The output is shown below.
+```
+2017/09/05 15:21:28 X-Direct-Download: true
+2017/09/05 15:21:28 Number of concurrent download: 4
+Enter DSS Username: 9008895
+Enter DSS Password: **********
+2017/09/05 15:21:43 Step 1: RequestToken
+2017/09/05 15:21:46 Step 2: ExtractRaw for TickHistoryMarketDepthExtractionRequest
+2017/09/05 15:22:19 Step 3: Checking Status (202) of Extraction (1)
+2017/09/05 15:22:52 Step 3: Checking Status (202) of Extraction (2)
+2017/09/05 15:23:25 Step 3: Checking Status (202) of Extraction (3)
+2017/09/05 15:23:47 ExtractionID: "2000000002101180"
+2017/09/05 15:23:47 Step 4: Get File information
+2017/09/05 15:23:48 File: _OnD_0x05dc5346defb3036.csv.gz, Size: 12318367
+2017/09/05 15:23:48 Step 5: Get AWS URL
+2017/09/05 15:23:49 AWS: https://s3.amazonaws.com/tickhistory.query.production.hdc-results/E72B426B7E554FA48E15D
+96B60162A93/data/merged/merged.csv.gz?AWSAccessKeyId=AKIAJVAI4XORJURKYMEA&Expires=1504621429&response-content-di
+sposition=attachment%3B%20filename%3D_OnD_0x05dc5346defb3036.csv.gz&Signature=SGmq6VsvXQPvW7MiHMOjuNj8aJI%3D&x-a
+mz-request-payer=requester
+2017/09/05 15:23:49 Step 6: Concurrent Download: _OnD_0x05dc5346defb3036.csv.gz, Size: 12318367, Connection: 4
+2017/09/05 15:23:49 ConcurrentDownload: _OnD_0x05dc5346defb3036.csv.gz, conn=4
+2017/09/05 15:23:49 Part 1: 0 - 3079590
+2017/09/05 15:23:49 Part 2: 3079591 - 6159181
+2017/09/05 15:23:49 Part 3: 6159182 - 9238772
+2017/09/05 15:23:49 Download File: part1, 0, 3079590
+2017/09/05 15:23:49 Download File: part2, 3079591, 6159181
+2017/09/05 15:23:49 Part 4: 9238773-
+2017/09/05 15:23:49 Download File: part4, 9238773, -1
+2017/09/05 15:23:49 Download File: part3, 6159182, 9238772
+2017/09/05 15:23:54 part2, Bytes: 956719/Total: 3079591 (31%)
+2017/09/05 15:23:54 part4, Bytes: 1183022/Total: 3079594 (38%)
+2017/09/05 15:23:54 part3, Bytes: 1095983/Total: 3079591 (36%)
+2017/09/05 15:23:54 part1, Bytes: 1600821/Total: 3079591 (52%)
+2017/09/05 15:23:55 part3: Download Completed, Speed: Avg 601.40 KB/s, Max 663.00 KB/s
+2017/09/05 15:23:55 part1: Download Completed, Speed: Avg 601.40 KB/s, Max 816.00 KB/s
+2017/09/05 15:23:56 part2: Download Completed, Speed: Avg 501.17 KB/s, Max 1377.00 KB/s
+2017/09/05 15:23:56 part4: Download Completed, Speed: Avg 501.17 KB/s, Max 1105.00 KB/s
+2017/09/05 15:23:56 Merging Files: _OnD_0x05dc5346defb3036.csv.gz
+2017/09/05 15:23:56 Download Time: 8.231s
+```
 
 ## References
 
