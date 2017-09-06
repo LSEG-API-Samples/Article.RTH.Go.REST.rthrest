@@ -108,7 +108,7 @@ Metadata string `json:"@odata.context,omitempty"`
 ```
 The **omitempty** option specifies that the field should be omitted from the encoding if the field has an empty value, defined as false, 0, a nil pointer, a nil interface value, and any empty array, slice, map, or string.
 
-The value of **@odata.type** is unique and constant for each request type. For example, the value of **@odata.type** field for **TickHistoryMarketDepthExtractionRequest** is **#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.TickHistoryMarketDepthExtractionRequest**. Therefore, it is inconvenient and prone to error, if this value will be set by users. Therefore, a custom field's tag (**odata**) is defined for this **Metadata** field so the user doesn't need to specify its value when using the **TickHistoryMarketDepthExtractionRequest** type.
+The value of **@odata.type** is unique and constant for each request type. It contains the OData's type name. For example, the value of **@odata.type** field for **TickHistoryMarketDepthExtractionRequest** is **#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.TickHistoryMarketDepthExtractionRequest**. It is inconvenient and prone to error, if this value is set by users. Therefore, a custom field's tag (**odata**) is defined for this **Metadata** field so the user doesn't need to specify its value when using the **TickHistoryMarketDepthExtractionRequest** type. 
 
 ```
 type TickHistoryMarketDepthExtractionRequest struct {	
@@ -116,7 +116,7 @@ type TickHistoryMarketDepthExtractionRequest struct {
     ...
 }
 ```
-To use this **odata** tag, the custom JSON marshaler is defined for this type. The custom marshaler will be used when this type is passed as an argument to **json.Marshal** method.  
+The value of this **odata** tag is the OData's type name. To use this tag, the custom JSON marshaler is defined for this type. The custom marshaler is used when this type is passed as an argument to **json.Marshal** method.  
 ```
 func (r TickHistoryMarketDepthExtractionRequest) MarshalJSON() ([]byte, error) {
 	type _TickHistoryMarketDepthExtractionRequest TickHistoryMarketDepthExtractionRequest
@@ -252,7 +252,7 @@ The above code decodes the following JSON object to **RawExtractionResults** typ
 ```
 The value of **@odata.type** field in JSON object is decoded to **Metadata** field in **RawExtractionResults** type.
 
-In conclusion, using types to encode and decode JSON objects is effective and flexible. Because the extraction request is a static type in Go programming language, the incorrect field names will be caught at the compile time. It is also useful when using with IDE that supports Intellisense, such as Visual Studio Code. Moreover, the user-defined types can be reused by other examples. 
+In conclusion, using types to encode and decode JSON objects is effective and flexible. Because the extraction request is a static type in Go programming language, the incorrect field names will be caught at  compile time. It is also useful when using with IDE that supports Intellisense, such as Visual Studio Code. Moreover, the user-defined types can be reused by other examples. 
 
 ## Encode enumeration
 TRTH V2 REST API defines enumerations used in JSON objects, such as **TickHistoryExtractByMode**, **TickHistoryMarketDepthViewOptions**, and **ReportDateRangeType**. Enumerations can also be defined in Go programming language and they can be used when constructing the request message.
@@ -292,7 +292,7 @@ func (d TickHistoryMarketDepthViewOptions) MarshalText() ([]byte, error) {
 	return []byte(tickHistoryMarketDepthViewOptions[d]), nil
 }
 ```
-The above code defines an array of strings called **tickHistoryMarketDepthViewOptions** which contains a string for each enumeration value. This array is used by the custom text marshaler of **TickHistoryMarketDepthViewOptions** type to convert an integer to a string while marshaling. For example, if the application sets the value of **TickHistoryMarketDepthViewOptions** type to **ViewOptionsNormalizedLL2Enum (4)**, when marshaling, the custom text marshaler of this type will return a **"NormalizedLL2"** string which is the string at the fourth index in the array and this string will be used by the JSON marshaler, as shown below.
+The above code defines an array of strings called **tickHistoryMarketDepthViewOptions** which contains a string for each enumeration value. This array is used by the custom text marshaler of **TickHistoryMarketDepthViewOptions** type to convert an integer to a string while marshaling. For example, if the application sets the value of **TickHistoryMarketDepthViewOptions** type to **ViewOptionsNormalizedLL2Enum (4)**, when marshaling, the custom text marshaler of this type will return a **"NormalizedLL2"** string which is a string at the fourth index in the array and this string will be used by the JSON marshaler, as shown below.
 
 ```
 "Condition":{
@@ -302,13 +302,13 @@ The above code defines an array of strings called **tickHistoryMarketDepthViewOp
 
 ## Concurrently download a gzip file
 
-When the extraction is completed, the file is available on the DSS server for downloading. The result file of **ExtractRaw** extraction is in **.csv.gz** format and the HTTP response when downloading the result file typically contains **Content-Encoding: gzip** in the header. With this header, the **net/http** library in Go programming language typically decompresses the gzip file and then returns the csv to the application. To download the raw gzip file, the decompression must be disabled by using the following code.
+When the extraction is completed, the file is available on the DSS server for downloading. The result file of **ExtractRaw** extraction is in **.csv.gz** format and the HTTP response when downloading the result file typically contains **Content-Encoding: gzip** in the header. With this header, the **net/http** package in Go programming language typically decompresses the gzip file and then returns the csv to the application. However, refer to [this advisory](https://developers.thomsonreuters.com/thomson-reuters-tick-history-trth/thomson-reuters-tick-history-trth-rest-api/docs?content=22738&type=documentation_item), the returned csv data from the Go package may be incomplete. Therefore, the application should disable the decompression logic by using the following code.
 ```
 tr := &http.Transport{
     DisableCompression: true,    
 }
 ```
-Depending on the number of instruments or the range of periods specified in the extraction request, the size of gzip file could be gigantic.  According to TRTH V2 REST API User Guide, download speed is limited to 1 MB/s for each connection. Therefore, downloading the huge gzip file can take more than several hours with a single connection. 
+Depending on the number of instruments or the range of periods specified in the extraction request, the size of gzip file could be gigantic. According to TRTH V2 REST API User Guide, download speed is limited to 1 MB/s for each connection. Therefore, downloading the huge gzip file can take more than several hours with a single connection. 
 
 To speed up the download, the file can download concurrently with multiple connections. Each connection will download a specific range of a file by defining a range (offset) in the HTTP request header. 
 
@@ -327,7 +327,7 @@ Date: Sun, 03 Sep 2017 07:34:05 GMT
 ```
 The response also indicates the content size, starting, and ending offset. 
 
-However, in order to download file concurrently, the starting and ending offset of each download connection must be calculated from the total size of result file. There are several ways to get the size of the extracted file. The example in this article shows the way to get the size of result file by using the **Extraction ID** appearing in the **Notes** field when the job is completed. 
+However, in order to download file concurrently, the starting and ending offset of each download connection must be calculated from the total size of result file. There are several ways to get the size of extracted file. The example in this article uses the **Extraction ID** appearing in the **Notes** field when the job is completed to get the size of extracted file. 
 
 ```
 {
@@ -338,17 +338,7 @@ However, in order to download file concurrently, the starting and ending offset 
     User ID: 9008895
     Extraction ID: 2000000002049332
     Schedule: 0x05dbaba5eceb2f76 (ID = 0x0000000000000000)
-    Input List (1 items):  (ID = 0x05dbaba5eceb2f76) Created: 09/03/2017 14:33:56 Last Modified: 09/03/2017 14:33:56
-    Report Template (12 fields): _OnD_0x05dbaba5eceb2f76 (ID = 0x05dbaba63edb2f76) Created: 09/03/2017 14:32:16 Last Modified: 09/03/2017 14:32:16
-    Schedule dispatched via message queue (0x05dbaba5eceb2f76), Data source identifier (19624AF632374B9B8613138BEDA99FC6)
-    Schedule Time: 09/03/2017 14:32:17
-    Processing started at 09/03/2017 14:32:17
-    Processing completed successfully at 09/03/2017 14:33:56
-    Extraction finished at 09/03/2017 07:33:56 UTC, with servers: tm01n01
-    Instrument <RIC,IBM.N> expanded to 1 RIC: IBM.N.
-    Quota Message: INFO: Tick History Cash Quota Count Before Extraction: 1956; Instruments Extracted: 1; Tick History Cash Quota Count After Extraction: 1956, 391.2% of Limit; Tick History Cash Quota Limit: 500
-    Manifest: #RIC,Domain,Start,End,Status,Count
-    Manifest: IBM.N,Market Price,2017-07-03T11:30:01.198715182Z,2017-08-22T20:45:07.095340511Z,Active,489036"
+    ...
   ]
 }
 ```
@@ -379,9 +369,9 @@ Connection 2: Range: Bytes=3079591-6159181
 Connection 3: Range: Bytes=6159182-9238772
 Connection 4: Range: Bytes=9238773 -
 ```
-The fourth connection will start downloading the file starting at 9238773 offset until the end of file. After all connections complete downloading files, all files must be merged according to the offset order to get the completed file.
+The fourth connection will start downloading the file starting at 9238773 offset until the end of file. After all connections complete downloading files, all files must be merged according to the offset order to get the complete file.
 
-The following test results compare the download times between a single connection and four connections.
+The following test results compare the download time between a single connection and four connections.
 
 |No.|Total download time (seconds) with a single connection|Total download time (seconds) with four concurrent connections|
 | ------------- |-------------|-----|
@@ -414,7 +404,7 @@ Location: https://s3.amazonaws.com/tickhistory.query.production.hdc-results/xxx/
 
 Then, the application can use this new AWS URL to download the file.
 
-However, when retrieving the HTTP status code 302, the **http** library in Go programming language will automatically redirect to the new URL with the same HTTP headers of the previous request which have fields for TRTH V2 REST API. This causes AWS returning **403 Forbidden** status code.
+However, when retrieving the HTTP status code 302, the **http** package in Go programming language will automatically redirect to the new URL with the same HTTP headers of the previous request which have fields for TRTH V2 REST API. This causes AWS returning **403 Forbidden** status code.
 
 To avoid this issue, the application should disable this automatic redirect by using the following code.
 
