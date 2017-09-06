@@ -437,7 +437,7 @@ The optional arguments for this example are:
 |-n|Specify the number of concurrent downloads|Integer (1)|
 |-aws|Flag to download from  AWS|Boolean (false)|
 |-X|Flag to trace HTTP request and response|Boolean (false)|
-|-proxy|The proxy setting (http://user:password@proxy:port) ||
+|-proxy|The proxy setting (http://username:password@proxy:port) ||
 
 To download the example, please run the following command.
 
