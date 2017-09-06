@@ -29,7 +29,7 @@ Developers can use Go programming language to consume Tick History data via TRTH
 TRTH V2 REST API requires JSON (JavaScript Object Notation) in request and response messages. JSON is a lightweight data-interchange format. It is easy for humans to read and write and easy for machines to parse and generate. In Go programming language, there are several ways to encode and decode JSON objects. 
 
 ### Using a String to Encode and Decode JSON Object
-JSON is a text format so the application can directly construct a JSON string for the HTTP request by using string manipulation and process a JSON string in the HTTP response by using a string parser or regular expression. The method is suitable for proving the programing concepts or verifying the correctness of HTTP request and response messages. It is quick and easy but it is ineffective and prone to error.
+JSON is a text format so the application can directly construct a JSON string for the HTTP request by using string manipulation and process a JSON string in the HTTP response by using a string parser or regular expression. The method is suitable for proving the programming concepts or verifying the correctness of HTTP request and response messages. It is quick and easy but it is ineffective and prone to error.
 
 ### Using a Map to Encode and Decode JSON Object
 JSON is also a key and value pair data so **map[string]interface{}** can be used with **json.Marshal** and **json.Unmarshal** functions available in the **encoding/json** package to encode and decode JSON objects. 
@@ -114,7 +114,7 @@ type TickHistoryMarketDepthExtractionRequest struct {
     ...
 }
 ```
-To use this **odata** tag, the custom JSON marshaller is defined for this type. The custom marshaller will be used when this type is passed as an argument to **json.Marshal** method.  
+To use this **odata** tag, the custom JSON marshaler is defined for this type. The custom marshaler will be used when this type is passed as an argument to **json.Marshal** method.  
 ```
 func (r TickHistoryMarketDepthExtractionRequest) MarshalJSON() ([]byte, error) {
 	type _TickHistoryMarketDepthExtractionRequest TickHistoryMarketDepthExtractionRequest
@@ -126,9 +126,9 @@ func (r TickHistoryMarketDepthExtractionRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(_TickHistoryMarketDepthExtractionRequest(r))
 }
 ```
-This marshaller uses reflection to get the value from **odata** tag, and set the value back to **Metadata** field. It also defines a new type (**_TickHistoryMarketDepthExtractionRequest**) as an alias type for the marshaled type. After setting the value in the **Metadata** field, it casts the marshaled type to the new type and passes this new type as an argument to **json.Marshal** function. Thus, the default marshaller of this new type will be used to marshal the data. This method is used to prevent the recursive call to the same custom marshaller of **TickHistoryMarketDepthExtractionRequest** type. 
+This marshaler uses reflection to get the value from **odata** tag, and set the value back to **Metadata** field. It also defines a new type (**_TickHistoryMarketDepthExtractionRequest**) as an alias type for the marshaled type. After setting the value in the **Metadata** field, it casts the marshaled type to the new type and passes this new type as an argument to **json.Marshal** function. Thus, the default marshaler of this new type will be used to marshal the data. This method is used to prevent the recursive call to the same custom marshaler of **TickHistoryMarketDepthExtractionRequest** type. 
 
-The following code shows how to use this user-defined type and marshaller to encode JSON object.
+The following code shows how to use this user-defined type and marshaler to encode JSON object.
 
 ```
 request := new(trthrest.TickHistoryMarketDepthExtractionRequest)
@@ -165,7 +165,7 @@ req1, _ := json.Marshal(struct {
     ExtractionRequest: request,
 })
 ```
-The above code is from the example which shows how to use **TickHistoryMarketDepthExtractionRequest** type and its marshaller to encode JSON object. The encoded JSON object looks like:
+The above code is from the example which shows how to use **TickHistoryMarketDepthExtractionRequest** type and its marshaler to encode JSON object. The encoded JSON object looks like:
 ```
 {
     "ExtractionRequest":{
@@ -217,7 +217,7 @@ The JSON object shows that the **Metadata** field in **TickHistoryMarketDepthExt
 "@odata.type":"#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.TickHistoryMarketDepthExtractionRequest",
 ```
 
-After the extraction request is sent, the HTTP response will return with the JSON object when the extraction is completed . To decode the returned JSON object, **json.Unmarshal** function is called with **RawExtractionResult** type as an argument.
+After the extraction request is sent, the HTTP response will return with the JSON object when the extraction is completed. To decode the returned JSON object, **json.Unmarshal** function is called with **RawExtractionResult** type as an argument.
 
 ```
 extractRawResult := &trthrest.RawExtractionResult{}
@@ -250,7 +250,7 @@ The above code decodes the following JSON object to **RawExtractionResults** typ
 ```
 The value of **@odata.type** field in JSON object is decoded to **Metadata** field in **RawExtractionResults** type.
 
-In conclusion, using types to encode and decode JSON objects is effective and flexible. Because the extraction request is a static type in Go programming languague, the incorrect field names will be caught at the compile time. It is also useful when using with IDE that supports Intellisense, such as Visual Studio Code. Moreover, the user-defined types can be reused by other examples. 
+In conclusion, using types to encode and decode JSON objects is effective and flexible. Because the extraction request is a static type in Go programming language, the incorrect field names will be caught at the compile time. It is also useful when using with IDE that supports Intellisense, such as Visual Studio Code. Moreover, the user-defined types can be reused by other examples. 
 
 ## Encode enumeration
 TRTH V2 REST API defines enumerations used in JSON objects, such as **TickHistoryExtractByMode**, **TickHistoryMarketDepthViewOptions**, and **ReportDateRangeType**. Enumerations can also be defined in Go programming language and they can be used when constructing the request message.
@@ -275,7 +275,7 @@ request.Condition.View = trthrest.ViewOptionsNormalizedLL2Enum
 ```
 Condition.View is **TickHistoryMarketDepthViewOptions** type and its value is set to **ViewOptionsNormalizedLL2Enum**. 
 
-However, in JSON object, these enumeration fields are encoded as strings, not integers. To encode an enumeration as as a string, an array of string and custom text marshaller are defined.
+However, in JSON object, these enumeration fields are encoded as strings, not integers. To encode an enumeration as as a string, an array of string and custom text marshaler are defined.
 
 ```
 var tickHistoryMarketDepthViewOptions = [...]string{
@@ -290,7 +290,7 @@ func (d TickHistoryMarketDepthViewOptions) MarshalText() ([]byte, error) {
 	return []byte(tickHistoryMarketDepthViewOptions[d]), nil
 }
 ```
-The above code defines an array of strings called **tickHistoryMarketDepthViewOptions** which contains a string for each enumeration value. This array is used by the custom text marshaller of **TickHistoryMarketDepthViewOptions** type to convert an integer to a string while marshaling. For example, if the application sets the value of **TickHistoryMarketDepthViewOptions** type to **ViewOptionsNormalizedLL2Enum (4)**, when marshaling, the custom text marshaller of this type will return a **"NormalizedLL2"** string which is the string at the fourth index in the array and this string will be used by the JSON marshaller, as shown below.
+The above code defines an array of strings called **tickHistoryMarketDepthViewOptions** which contains a string for each enumeration value. This array is used by the custom text marshaler of **TickHistoryMarketDepthViewOptions** type to convert an integer to a string while marshaling. For example, if the application sets the value of **TickHistoryMarketDepthViewOptions** type to **ViewOptionsNormalizedLL2Enum (4)**, when marshaling, the custom text marshaler of this type will return a **"NormalizedLL2"** string which is the string at the fourth index in the array and this string will be used by the JSON marshaler, as shown below.
 
 ```
 "Condition":{
