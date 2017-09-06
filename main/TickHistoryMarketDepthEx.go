@@ -43,7 +43,7 @@ func main() {
 	traceFlag := flag.Bool("X", false, "Enable HTTP tracing (false)")
 	username := flag.String("u", "", "DSS Username ('')")
 	password := flag.String("p", "", "DSS Password ('')")
-	proxy := flag.String("proxy", "", "Proxy: http://user:password@proxy:port")
+	proxy := flag.String("proxy", "", "Proxy: http://username:password@proxy:port")
 	flag.Parse()
 
 	dssUserName = *username
