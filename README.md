@@ -29,10 +29,10 @@ Developers can use Go programming language to consume Tick History data via TRTH
 TRTH V2 REST API requires JSON (JavaScript Object Notation) in request and response messages. JSON is a lightweight data-interchange format. It is easy for humans to read and write and easy for machines to parse and generate. In Go programming language, there are several ways to encode and decode JSON objects. 
 
 ### Using a String to Encode and Decode JSON Object
-JSON is a text format so the application can directly construct a JSON string for the HTTP request by using string manipulation and process a JSON string in the HTTP response by using a string parser or regular expression. The method is suitable for proving the programming concepts or verifying the correctness of HTTP request and response messages. It is quick and easy but it is ineffective and prone to error.
+JSON is a text format so the application can directly construct a JSON string for the HTTP request by using string manipulation and process a JSON string in the HTTP response by using a string parser or regular expression. This method is quick and easy to implement but it is ineffective and prone to error. Therefore it is suitable for proving the programming concepts or verifying the correctness of HTTP request and response messages.
 
 ### Using a Map to Encode and Decode JSON Object
-JSON is also a key and value pair data so **map[string]interface{}** can be used with **json.Marshal** and **json.Unmarshal** functions available in the **encoding/json** package to encode and decode JSON objects. 
+JSON is also a key and value pair data so **map[string]interface{}** can be used with **json.Marshal** and **json.Unmarshal** functions. These functions are available in the **encoding/json** package to encode and decode JSON objects. 
 
 ```
 jsonMap := map[string]interface{}{
@@ -44,12 +44,12 @@ jsonMap := map[string]interface{}{
 jsonByte, _ := json.Marshal(jsonMap)
 fmt.Println(string(jsonByte))
 ```
-The above code uses **map[string]interface{}** to store key/value pair data. Then, it uses **json.Marshal** function to encode the map to JSON byte array. After that, it prints the encoded JSON object. 
+The above code uses **map[string]interface{}** to store key and value pair data. Then, it uses **json.Marshal** function to encode the map to JSON byte array. After that, it prints the encoded JSON object. 
 
 ```
 {"a":"1","b":2,"field1":"value1","field2":2}
 ```
-To decode a JSON string, **json.Unmarshal** function can be used. 
+To decode a JSON object, **json.Unmarshal** function can be used. 
 
 ```
 var jsonMap map[string]interface{}
@@ -59,7 +59,7 @@ for k, v := range jsonMap {
     fmt.Printf("%s: %v\n", k, v)
 }
 ```
-The above code defines a JSON string in a string variable. Then, it calls the **json.Unmarshal** function to decode the JSON object to a map. After that, it prints keys and values in the map.
+The above code defines a JSON object in a string variable. Then, it calls the **json.Unmarshal** function to decode the JSON object to a map. After that, it prints keys and values in the map.
 ```
 b: 2
 field1: value1
@@ -67,7 +67,9 @@ field2: 2
 a: 1
 ```
 
-The drawback from this method is that the order of fields when encoding and decoding can be out of order, as shown in the previous examples. This could be the problem when using with the API that the order of fields in the HTTP request must be preserved. 
+The drawback from this method is that the order of fields when encoding and decoding can be out of order, as shown in the previous examples. This could be the problem when using with the API that the order of fields in the HTTP request must be preserved.
+
+Refer to [this question](https://community.developers.thomsonreuters.com/questions/10093/dss-rest-api-error-400-malformed-request-payload.html), in TRTH V2 REST API, the order of fields in JSON object is important especially for the **@odata.type** field. Therefore, this method may not be suitable to use with TRTH V2 REST API for encoding JSON objects.
 
 ### Using a Type to Encode and Decode JSON Object
 
