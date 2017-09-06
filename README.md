@@ -347,7 +347,7 @@ From the above response, the **Extraction ID** in the **Notes** field is 2000000
 ```
 GET /RestApi/v1/Extractions/ReportExtractions('2000000002049332')/FullFile
 ```
-The response for this request is the description of the data file.
+The response for this request contains the description of the extracted file.
 ```
 {
   "@odata.context": "https://hosted.datascopeapi.reuters.com/RestApi/v1/$metadata#ExtractedFiles/$entity",
@@ -406,7 +406,7 @@ Then, the application can use this new AWS URL to download the file.
 
 However, when retrieving the HTTP status code 302, the **http** package in Go programming language will automatically redirect to the new URL with the same HTTP headers of the previous request which have fields for TRTH V2 REST API. This causes AWS returning **403 Forbidden** status code.
 
-To avoid this issue, the application should disable this automatic redirect by using the following code.
+To avoid this issue, the application should disable this redirect by using the following code.
 
 ```
 client := &http.Client{
@@ -419,7 +419,7 @@ client := &http.Client{
 Then, the application can remove TRTH V2 headers and optionally add its own HTTP headers in the request. Concurrent downloads mentioned in the previous section can also be used with AWS by specifying **Range** header in the request.
 
 ## Go Get and Run the Example
-**TickHistoryMarketDepthEx.go** is implemented to demonstrate methods mentioned in this article. It uses **ExtractRaw** endpoint to send **TickHistoryMarketDepthExtractionRequest** to extract normalized legacy level 2 data of IBM.N from 1 Jul 2017 to 23 Aug 2017. All settings are hard-coded. This example supports the following features:
+**TickHistoryMarketDepthEx.go** is implemented to demonstrate solutions mentioned in this article. It uses **ExtractRaw** endpoint to send **TickHistoryMarketDepthExtractionRequest** to extract normalized legacy level 2 data of IBM.N from 1 Jul 2017 to 23 Aug 2017. All settings are hard-coded. This example supports the following features:
 * Concurrent Downloads
 * Download a file from AWS
 * Request and response tracing
@@ -437,6 +437,7 @@ The optional arguments for this example are:
 |-n|Specify the number of concurrent downloads|Integer (1)|
 |-aws|Flag to download from  AWS|Boolean (false)|
 |-X|Flag to trace HTTP request and response|Boolean (false)|
+|-proxy|The proxy setting (http://user:password@proxy:port) ||
 
 To download the example, please run the following command.
 
