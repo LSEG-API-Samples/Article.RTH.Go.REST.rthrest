@@ -104,9 +104,9 @@ JSON object in the HTTP request and response of TRTH V2 REST API contains **@dat
 ```
 However, **@data.type** is an invalid field name in Go programming language. To solve this issue, the **json** field's tag is used in the **Metadata** field to customize the field name for JSON object.
 ```
-Metadata string `json:"@odata.context,omitempty"`
+Metadata string `json:"@odata.type,omitempty"`
 ```
-The **omitempty** option specifies that the field should be omitted from the encoding if the field has an empty value, defined as false, 0, a nil pointer, a nil interface value, and any empty array, slice, map, or string.
+**@odata.type** is set as a value for the **json** field's tag. The **omitempty** option specifies that the field should be omitted from the encoding if the field has an empty value, defined as false, 0, a nil pointer, a nil interface value, and any empty array, slice, map, or string.
 
 The value of **@odata.type** is unique and constant for each request type. It contains the OData's type name. For example, the value of **@odata.type** field for **TickHistoryMarketDepthExtractionRequest** is **#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.TickHistoryMarketDepthExtractionRequest**. It is inconvenient and prone to error, if this value is set by users. Therefore, a custom field's tag (**odata**) is defined for this **Metadata** field so the user doesn't need to specify its value when using the **TickHistoryMarketDepthExtractionRequest** type. 
 
@@ -250,12 +250,18 @@ The above code decodes the following JSON object to **RawExtractionResults** typ
    ]
 }
 ```
-The value of **@odata.type** field in JSON object is decoded to **Metadata** field in **RawExtractionResults** type.
+The value of **@odata.context** field in JSON object is decoded to **Metadata** field  according to the defined **json** field's tag in the **RawExtractionResults** type.
 
-In conclusion, using types to encode and decode JSON objects is effective and flexible. Because the extraction request is a static type in Go programming language, the incorrect field names will be caught at  compile time. It is also useful when using with IDE that supports Intellisense, such as Visual Studio Code. Moreover, the user-defined types can be reused by other examples. 
+```
+type RawExtractionResult struct {
+    Metadata string `json:"@odata.context,omitempty"`
+
+```
+
+In conclusion, using types to encode and decode JSON objects is effective and flexible. Because the extraction request is a static type in Go programming language, the incorrect field names will be caught at  compile time. It is also useful when using with IDE that supports Intellisense, such as Visual Studio Code. Moreover, the user-defined types can be reused by other GO TRTH V2 applications. 
 
 ## Encode enumeration
-TRTH V2 REST API defines enumerations used in JSON objects, such as **TickHistoryExtractByMode**, **TickHistoryMarketDepthViewOptions**, and **ReportDateRangeType**. Enumerations can also be defined in Go programming language and they can be used when constructing the request message.
+TRTH V2 REST API defines enumerations used in JSON objects, such as **TickHistoryExtractByMode**, **TickHistoryMarketDepthViewOptions**, and **ReportDateRangeType**. These enumerations can also be defined in Go programming language and can be used to construct the request message.
 
 ```
 type TickHistoryMarketDepthViewOptions int
@@ -275,7 +281,7 @@ The following shows how to use this enumeration.
 ```
 request.Condition.View = trthrest.ViewOptionsNormalizedLL2Enum
 ```
-Condition.View is **TickHistoryMarketDepthViewOptions** type and its value is set to **ViewOptionsNormalizedLL2Enum**. 
+**Condition.View** is **TickHistoryMarketDepthViewOptions** type and its value is set to **ViewOptionsNormalizedLL2Enum**. 
 
 However, in JSON object, these enumeration fields are encoded as strings, not integers. To encode an enumeration as as a string, an array of string and custom text marshaler are defined.
 
