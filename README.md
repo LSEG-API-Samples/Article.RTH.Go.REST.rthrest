@@ -283,7 +283,7 @@ request.Condition.View = trthrest.ViewOptionsNormalizedLL2Enum
 ```
 **Condition.View** is **TickHistoryMarketDepthViewOptions** type and its value is set to **ViewOptionsNormalizedLL2Enum**. 
 
-However, in JSON object, these enumeration fields are encoded as strings, not integers. To encode an enumeration as as a string, an array of string and custom text marshaler are defined.
+However, in JSON object, these enumeration fields are encoded as strings, not integers. To encode an enumeration as a string, an array of string and custom text marshaler are defined.
 
 ```
 var tickHistoryMarketDepthViewOptions = [...]string{
