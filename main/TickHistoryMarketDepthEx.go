@@ -13,14 +13,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/TR-API-Samples/Article.TRTH.Go.REST.trthrest"
+	"github.com/Refinitiv-API-Samples/Article.RTH.Go.REST.rthrest"
 	"github.com/howeyc/gopass"
 )
 
 //Enter username and password here
 var dssUserName = ""
 var dssPassword = ""
-var trthURL = "https://hosted.datascopeapi.reuters.com/RestApi/v1/"
+var rthURL = "https://hosted.datascopeapi.reuters.com/RestApi/v1/"
 
 //GetExtractionIDFromNote : Get Extraction ID number from note in the response
 func GetExtractionIDFromNote(note string) string {
@@ -65,13 +65,13 @@ func main() {
 	headers["Prefer"] = "respond-async"
 
 	//Prepare the TickHistoryMarketDepthExtractionRequest
-	request := new(trthrest.TickHistoryMarketDepthExtractionRequest)
-	request.Condition.View = trthrest.ViewOptionsNormalizedLL2Enum
-	request.Condition.SortBy = trthrest.SortSingleByRicEnum
+	request := new(rthrest.TickHistoryMarketDepthExtractionRequest)
+	request.Condition.View = rthrest.ViewOptionsNormalizedLL2Enum
+	request.Condition.SortBy = rthrest.SortSingleByRicEnum
 	request.Condition.NumberOfLevels = 10
-	request.Condition.MessageTimeStampIn = trthrest.TimeOptionsGmtUtcEnum
+	request.Condition.MessageTimeStampIn = rthrest.TimeOptionsGmtUtcEnum
 	request.Condition.DisplaySourceRIC = true
-	request.Condition.ReportDateRangeType = trthrest.ReportDateRangeTypeRangeEnum
+	request.Condition.ReportDateRangeType = rthrest.ReportDateRangeTypeRangeEnum
 	startdate := time.Date(2017, 7, 1, 0, 0, 0, 0, time.UTC)
 	request.Condition.QueryStartDate = &startdate
 	enddate := time.Date(2017, 8, 23, 0, 0, 0, 0, time.UTC)
@@ -91,8 +91,8 @@ func main() {
 		"Sample Data",
 	}
 
-	request.IdentifierList.InstrumentIdentifiers = append(request.IdentifierList.InstrumentIdentifiers, trthrest.InstrumentIdentifier{Identifier: "IBM.N", IdentifierType: "Ric"})
-	request.IdentifierList.ValidationOptions = &trthrest.InstrumentValidationOptions{AllowHistoricalInstruments: true}
+	request.IdentifierList.InstrumentIdentifiers = append(request.IdentifierList.InstrumentIdentifiers, rthrest.InstrumentIdentifier{Identifier: "IBM.N", IdentifierType: "Ric"})
+	request.IdentifierList.ValidationOptions = &rthrest.InstrumentValidationOptions{AllowHistoricalInstruments: true}
 
 	//Define the HTTP transport and client used by the example
 	var tr http.Transport
@@ -127,9 +127,9 @@ func main() {
 
 	//Create JSON byte array for the token request
 	loginreq, err := json.Marshal(struct {
-		Credentials trthrest.Credential
+		Credentials rthrest.Credential
 	}{
-		Credentials: trthrest.Credential{
+		Credentials: rthrest.Credential{
 			Username: dssUserName,
 			Password: dssPassword,
 		},
@@ -139,7 +139,7 @@ func main() {
 	log.Printf("Step %d: RequestToken\n", step)
 
 	//Request to get the token
-	resp, err := trthrest.HTTPPost(client, trthrest.GetRequestTokenURL(trthURL), bytes.NewBuffer(loginreq), headers, *traceFlag)
+	resp, err := rthrest.HTTPPost(client, rthrest.GetRequestTokenURL(rthURL), bytes.NewBuffer(loginreq), headers, *traceFlag)
 
 	if err != nil {
 		log.Printf("Error: %s\n", err.Error())
@@ -154,7 +154,7 @@ func main() {
 	}
 
 	//Process the token in the reponse
-	var tokentResponse = &trthrest.RequestTokenResponse{}
+	var tokentResponse = &rthrest.RequestTokenResponse{}
 
 	err = json.Unmarshal(body, tokentResponse)
 	resp.Body.Close()
@@ -169,7 +169,7 @@ func main() {
 
 	//Prepare JSON object for TickHistoryMarketDepthExtractionRequest
 	req1, _ := json.Marshal(struct {
-		ExtractionRequest *trthrest.TickHistoryMarketDepthExtractionRequest
+		ExtractionRequest *rthrest.TickHistoryMarketDepthExtractionRequest
 	}{
 		ExtractionRequest: request,
 	})
@@ -177,7 +177,7 @@ func main() {
 	log.Printf("Step %d: ExtractRaw for TickHistoryMarketDepthExtractionRequest\n", step)
 
 	//Send the TickHistoryMarketDepthExtractionRequest to ExtractRaw endpoint
-	resp, err = trthrest.HTTPPost(client, trthrest.GetExtractRawURL(trthURL), bytes.NewBuffer(req1), headers, *traceFlag)
+	resp, err = rthrest.HTTPPost(client, rthrest.GetExtractRawURL(rthURL), bytes.NewBuffer(req1), headers, *traceFlag)
 
 	if err != nil {
 		log.Fatal(err)
@@ -195,7 +195,7 @@ func main() {
 			step++
 		}
 		log.Printf("Step %d: Checking Status (%d) of Extraction (%d)\n", step, resp.StatusCode, statusCount)
-		resp, err = trthrest.HTTPGet(client, location, headers, *traceFlag)
+		resp, err = rthrest.HTTPGet(client, location, headers, *traceFlag)
 	}
 
 	body, err = ioutil.ReadAll(resp.Body)
@@ -207,7 +207,7 @@ func main() {
 	}
 
 	//Process in the extraction response
-	extractRawResult := &trthrest.RawExtractionResult{}
+	extractRawResult := &rthrest.RawExtractionResult{}
 	err = json.Unmarshal(body, extractRawResult)
 	if err != nil {
 		log.Fatal(err)
@@ -232,7 +232,7 @@ func main() {
 		if extractionID != "" {
 			step++
 			log.Printf("Step %d: Get File information\n", step)
-			resp, err = trthrest.HTTPGet(client, trthrest.GetReportExtractionFullFileURL(trthURL, extractionID), headers, *traceFlag)
+			resp, err = rthrest.HTTPGet(client, rthrest.GetReportExtractionFullFileURL(rthURL, extractionID), headers, *traceFlag)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -245,7 +245,7 @@ func main() {
 
 				log.Fatalf("Status Code: %s\n%s ", resp.Status, string(body))
 			}
-			extractedFile := &trthrest.ExtractedFile{}
+			extractedFile := &rthrest.ExtractedFile{}
 			err = json.Unmarshal(body, extractedFile)
 			if err != nil {
 				log.Fatal(err)
@@ -262,13 +262,13 @@ func main() {
 	log.Printf("File: %s, Size: %d\n", outputFilename, fileSize)
 
 	//Set the download url to Extractions/RawExtractionResults('{{jobId}}')/$value
-	downloadURL := trthrest.GetRawExtractionResultGetDefaultStreamURL(trthURL, extractRawResult.JobID)
+	downloadURL := rthrest.GetRawExtractionResultGetDefaultStreamURL(rthURL, extractRawResult.JobID)
 	//Set the time to measure the download time
 	start := time.Now()
 	//If -aws is set, the application will download the result file from aws
 	if *directDownloadFlag == true {
 
-		//Clone the TRTH headers to newHeaders and then add X-Direct-Download to the new header
+		//Clone the RTH headers to newHeaders and then add X-Direct-Download to the new header
 		newHeaders := make(map[string]string)
 		for k, v := range headers {
 			newHeaders[k] = v
@@ -276,7 +276,7 @@ func main() {
 		newHeaders["X-Direct-Download"] = "true"
 		step++
 		log.Printf("Step %d: Get AWS URL\n", step)
-		resp, err = trthrest.HTTPGet(client, downloadURL, newHeaders, *traceFlag)
+		resp, err = rthrest.HTTPGet(client, downloadURL, newHeaders, *traceFlag)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -296,12 +296,12 @@ func main() {
 		//if we get the filename and filesize from Extractions/ReportExtractions, it will use the concurrent download
 		step++
 		log.Printf("Step %d: Concurrent Download: %s, Size: %d, Connection: %d\n", step, outputFilename, fileSize, *numOfConnection)
-		trthrest.ConcurrentDownload(client, headers, downloadURL, outputFilename, *numOfConnection, fileSize, *traceFlag)
+		rthrest.ConcurrentDownload(client, headers, downloadURL, outputFilename, *numOfConnection, fileSize, *traceFlag)
 	} else {
 		//if we can't get the filename and filesize from Extractions/ReportExtractions, it will download with one connection
 		step++
 		log.Printf("Step %d: Download: %s\n", step, outputFilename)
-		trthrest.DownloadFile(client, headers, downloadURL, outputFilename, -1, -1, *traceFlag)
+		rthrest.DownloadFile(client, headers, downloadURL, outputFilename, -1, -1, *traceFlag)
 	}
 	elapsed := time.Since(start)
 	log.Printf("Download Time: %s\n", elapsed)
