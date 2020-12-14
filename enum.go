@@ -1,4 +1,4 @@
-package trthrest
+package rthrest
 
 //TickHistoryMarketDepthViewOptions : This is an enumeration for TickHistoryMarketDepthViewOptions
 type TickHistoryMarketDepthViewOptions int

@@ -1,4 +1,4 @@
-package trthrest
+package rthrest
 
 //TickHistoryMarketDepthExtractionRequest : defined type for TickHistoryMarketDepthExtractionRequest. This type is used to request TRTH Market Depth data
 //This type will be encoded to Json by Marshaller

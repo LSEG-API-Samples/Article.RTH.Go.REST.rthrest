@@ -1,4 +1,4 @@
-package trthrest
+package rthrest
 import "time"
 //RequestTokenResponse : The HTTP response from Authentication/RequestToken request will be decoded to this type by json.Unmarshal
 type RequestTokenResponse struct {

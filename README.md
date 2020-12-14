@@ -2,15 +2,15 @@
 
 ## Introduction
 
-Thomson Reuters Tick History (TRTH) is an Internet-hosted product on the DataScope Select platform that provides SOAP-based API and a REST API for unparalleled access to historical high frequency data across global asset classes dating to 1996. However a legacy SOAP-based API is also available, and is scheduled to be sunset. Therefore client who still uses SOAP-based API may need to upgrade their application to use REST API instead.
+Refinitiv Tick History (RTH) is an Internet-hosted product on the DataScope Select platform that provides SOAP-based API and a REST API for unparalleled access to historical high frequency data across global asset classes dating to 1996. However a legacy SOAP-based API is also available, and is scheduled to be sunset. Therefore client who still uses SOAP-based API may need to upgrade their application to use REST API instead.
 
-This article demonstrates problems and solutions that developers should aware when using TRTH V2 On Demand data extraction with Go programming language. It uses Tick History Market Depth On Demand data extraction as an example to demonstrate the usage and solutions. However, the methods mentioned in this article can be applied to other types of data extractions and programming languages.
+This article demonstrates problems and solutions that developers should aware when using RTH V2 On Demand data extraction with Go programming language. It uses Tick History Market Depth On Demand data extraction as an example to demonstrate the usage and solutions. However, the methods mentioned in this article can be applied to other types of data extractions and programming languages.
 
 ## Prerequisite
 
 The following knowledge is required before reading this article.
 
-* How to use On Demand extraction in TRTH V2. This article doesn't explain TRTH V2 REST API On Demand data extraction request in detail. Fortunately, there is a [REST API Tutorial 3: On Demand Data extraction workflow](https://developers.thomsonreuters.com/thomson-reuters-tick-history-trth/thomson-reuters-tick-history-trth-rest-api/learning?content=11307&type=learning_material_item) tutorial available in the Developer Community which thoroughly explains On Demand data extraction
+* How to use On Demand extraction in RTH V2. This article doesn't explain RTH V2 REST API On Demand data extraction request in detail. Fortunately, there is a [REST API Tutorial 3: On Demand Data extraction workflow](https://developers.refinitiv.com/en/api-catalog/refinitiv-tick-history/refinitiv-tick-history-rth-rest-api/tutorials#rest-api-tutorial-3-on-demand-data-extraction-workflow) tutorial available in the Developer Community which thoroughly explains On Demand data extraction
 
 * Basic knowledge of Go programming language. This article doesn't cover the installation, settings, and usage of Go programming language. You can refer to the official [Go Programming Language Website](https://golang.org/) for this basic knowledge
 
@@ -18,7 +18,7 @@ The following knowledge is required before reading this article.
 
 Go is an open source project under a BSD-style license developed by a team at Google in 2007 and many contributors from the open source community. Its binary distributions are available for Linux, Max OS X, Windows, and more. Go is a statically typed and compiled language with a simple syntax. It features garbage collection, concurrency, type safety and large standard library.
 
-Developers can use Go programming language to consume Tick History data via TRTH V2 REST API. This article lists several problems and solutions which developers may find during development. The problems mentioned in this article include:
+Developers can use Go programming language to consume Tick History data via RTH V2 REST API. This article lists several problems and solutions which developers may find during development. The problems mentioned in this article include:
 
 * Encode and decode JSON objects
 * Encode enumeration
@@ -26,7 +26,7 @@ Developers can use Go programming language to consume Tick History data via TRTH
 * Download a gzip file from Amazon Web Services
 
 ## Encode and Decode JSON Objects
-TRTH V2 REST API requires JSON (JavaScript Object Notation) in request and response messages. JSON is a lightweight data-interchange format. It is easy for humans to read and write and easy for machines to parse and generate. In Go programming language, there are several ways to encode and decode JSON objects. 
+RTH V2 REST API requires JSON (JavaScript Object Notation) in request and response messages. JSON is a lightweight data-interchange format. It is easy for humans to read and write and easy for machines to parse and generate. In Go programming language, there are several ways to encode and decode JSON objects. 
 
 ### Using a String to Encode and Decode JSON Object
 JSON is a text format so the application can directly construct a JSON string for the HTTP request by using string manipulation and process a JSON string in the HTTP response by using a string parser or regular expression. This method is quick and easy to implement but it is ineffective and prone to error. Therefore it is suitable for proving the programming concepts or verifying the correctness of HTTP request and response messages.
@@ -69,7 +69,7 @@ a: 1
 
 The drawback from this method is that the order of fields when encoding and decoding can be out of order, as shown in the previous examples. This could be the problem when using with the API that the order of fields in the HTTP request must be preserved.
 
-Refer to [this question](https://community.developers.thomsonreuters.com/questions/10093/dss-rest-api-error-400-malformed-request-payload.html), in TRTH V2 REST API, the order of fields in JSON object is important especially for the **@odata.type** field. Therefore, this method may not be suitable to use with TRTH V2 REST API for encoding JSON objects.
+Refer to [this question](https://community.developers.refinitiv.com/questions/10093/dss-rest-api-error-400-malformed-request-payload.html), in RTH V2 REST API, the order of fields in JSON object is important especially for the **@odata.type** field. Therefore, this method may not be suitable to use with RTH V2 REST API for encoding JSON objects.
 
 ### Using a Type to Encode and Decode JSON Object
 
@@ -93,7 +93,7 @@ type RawExtractionResult struct {
 ``` 
 The first type is used in the HTTP request message to extract Tick History Market Depth data. The second type is for the JSON object in the HTTP response message when the extraction is completed. These types will be encoded and decoded as JSON objects. Each field represents a member of the JSON object by using a type's field name as a JSON object key.
 
-JSON object in the HTTP request and response of TRTH V2 REST API contains **@data.type** field which defines a type name of OData. 
+JSON object in the HTTP request and response of RTH V2 REST API contains **@data.type** field which defines a type name of OData. 
 ```
 {
     "ExtractionRequest":{
@@ -133,13 +133,13 @@ This marshaler uses reflection to get the value from **odata** tag, and set the 
 The following code shows how to use this user-defined type and marshaler to encode JSON object.
 
 ```
-request := new(trthrest.TickHistoryMarketDepthExtractionRequest)
-request.Condition.View = trthrest.ViewOptionsNormalizedLL2Enum
-request.Condition.SortBy = trthrest.SortSingleByRicEnum
+request := new(rthrest.TickHistoryMarketDepthExtractionRequest)
+request.Condition.View = rthrest.ViewOptionsNormalizedLL2Enum
+request.Condition.SortBy = rthrest.SortSingleByRicEnum
 request.Condition.NumberOfLevels = 10
-request.Condition.MessageTimeStampIn = trthrest.TimeOptionsGmtUtcEnum
+request.Condition.MessageTimeStampIn = rthrest.TimeOptionsGmtUtcEnum
 request.Condition.DisplaySourceRIC = true
-request.Condition.ReportDateRangeType = trthrest.ReportDateRangeTypeRangeEnum
+request.Condition.ReportDateRangeType = rthrest.ReportDateRangeTypeRangeEnum
 startdate := time.Date(2017, 7, 1, 0, 0, 0, 0, time.UTC)
 request.Condition.QueryStartDate = &startdate
 enddate := time.Date(2017, 8, 23, 0, 0, 0, 0, time.UTC)
@@ -158,11 +158,11 @@ request.ContentFieldNames = []string{
     "Number of Sellers",
     "Sample Data",
 }	
-request.IdentifierList.InstrumentIdentifiers = append(request.IdentifierList.InstrumentIdentifiers, trthrest.InstrumentIdentifier{Identifier: "IBM.N", IdentifierType: "Ric"})
-request.IdentifierList.ValidationOptions = &trthrest.InstrumentValidationOptions{AllowHistoricalInstruments: true}
+request.IdentifierList.InstrumentIdentifiers = append(request.IdentifierList.InstrumentIdentifiers, rthrest.InstrumentIdentifier{Identifier: "IBM.N", IdentifierType: "Ric"})
+request.IdentifierList.ValidationOptions = &rthrest.InstrumentValidationOptions{AllowHistoricalInstruments: true}
 
 req1, _ := json.Marshal(struct {
-    ExtractionRequest *trthrest.TickHistoryMarketDepthExtractionRequest
+    ExtractionRequest *rthrest.TickHistoryMarketDepthExtractionRequest
 }{
     ExtractionRequest: request,
 })
@@ -222,7 +222,7 @@ The JSON object shows that the **Metadata** field in **TickHistoryMarketDepthExt
 After the extraction request is sent, the HTTP response will return with the JSON object when the extraction is completed. To decode the returned JSON object, **json.Unmarshal** function is called with **RawExtractionResult** type as an argument.
 
 ```
-extractRawResult := &trthrest.RawExtractionResult{}
+extractRawResult := &rthrest.RawExtractionResult{}
 err = json.Unmarshal(body, extractRawResult)
 ```
 The above code decodes the following JSON object to **RawExtractionResults** type.
@@ -242,7 +242,7 @@ The above code decodes the following JSON object to **RawExtractionResults** typ
       Schedule Time: 09/02/2017 11:19:21
       Processing started at 09/02/2017 11:19:23
       Processing completed successfully at 09/02/2017 11:21:12
-      Extraction finished at 09/02/2017 04:21:12 UTC, with servers: tm04n01, TRTH (94.023 secs)
+      Extraction finished at 09/02/2017 04:21:12 UTC, with servers: tm04n01, RTH (94.023 secs)
       Instrument <RIC,IBM.N> expanded to 1 RIC: IBM.N.
       Quota Message: INFO: Tick History Cash Quota Count Before Extraction: 1956; Instruments Extracted: 1; Tick History Cash Quota Count After Extraction: 1956, 391.2% of Limit; Tick History Cash Quota Limit: 500
       Manifest: #RIC,Domain,Start,End,Status,Count
@@ -258,10 +258,10 @@ type RawExtractionResult struct {
 
 ```
 
-In conclusion, using types to encode and decode JSON objects is effective and flexible. Because the extraction request is a static type in Go programming language, the incorrect field names will be caught at  compile time. It is also useful when using with IDE that supports Intellisense, such as Visual Studio Code. Moreover, the user-defined types can be reused by other GO TRTH V2 applications. 
+In conclusion, using types to encode and decode JSON objects is effective and flexible. Because the extraction request is a static type in Go programming language, the incorrect field names will be caught at  compile time. It is also useful when using with IDE that supports Intellisense, such as Visual Studio Code. Moreover, the user-defined types can be reused by other GO RTH V2 applications. 
 
 ## Encode enumeration
-TRTH V2 REST API defines enumerations used in JSON objects, such as **TickHistoryExtractByMode**, **TickHistoryMarketDepthViewOptions**, and **ReportDateRangeType**. These enumerations can also be defined in Go programming language and can be used to construct the request message.
+RTH V2 REST API defines enumerations used in JSON objects, such as **TickHistoryExtractByMode**, **TickHistoryMarketDepthViewOptions**, and **ReportDateRangeType**. These enumerations can also be defined in Go programming language and can be used to construct the request message.
 
 ```
 type TickHistoryMarketDepthViewOptions int
@@ -279,7 +279,7 @@ The above code defines an enumeration type called **TickHistoryMarketDepthViewOp
 The following shows how to use this enumeration.
 
 ```
-request.Condition.View = trthrest.ViewOptionsNormalizedLL2Enum
+request.Condition.View = rthrest.ViewOptionsNormalizedLL2Enum
 ```
 **Condition.View** is **TickHistoryMarketDepthViewOptions** type and its value is set to **ViewOptionsNormalizedLL2Enum**. 
 
@@ -308,13 +308,13 @@ The above code defines an array of strings called **tickHistoryMarketDepthViewOp
 
 ## Concurrently download a gzip file
 
-When the extraction is completed, the file is available on the DSS server for downloading. The result file of **ExtractRaw** extraction is in **.csv.gz** format and the HTTP response when downloading the result file typically contains **Content-Encoding: gzip** in the header. With this header, the **net/http** package in Go programming language typically decompresses the gzip file and then returns the csv to the application. However, refer to [this advisory](https://developers.thomsonreuters.com/thomson-reuters-tick-history-trth/thomson-reuters-tick-history-trth-rest-api/docs?content=22738&type=documentation_item), the returned csv data from the Go package may be incomplete. Therefore, the application should disable the decompression logic by using the following code.
+When the extraction is completed, the file is available on the DSS server for downloading. The result file of **ExtractRaw** extraction is in **.csv.gz** format and the HTTP response when downloading the result file typically contains **Content-Encoding: gzip** in the header. With this header, the **net/http** package in Go programming language typically decompresses the gzip file and then returns the csv to the application. The application should disable the decompression logic by using the following code.
 ```
 tr := &http.Transport{
     DisableCompression: true,    
 }
 ```
-Depending on the number of instruments or the range of periods specified in the extraction request, the size of gzip file could be gigantic. According to TRTH V2 REST API User Guide, download speed is limited to 1 MB/s for each connection. Therefore, downloading the huge gzip file can take more than several hours with a single connection. 
+Depending on the number of instruments or the range of periods specified in the extraction request, the size of gzip file could be gigantic. According to RTH V2 REST API User Guide, download speed is limited to 1 MB/s for each connection. Therefore, downloading the huge gzip file can take more than several hours with a single connection. 
 
 To speed up the download, the file can download concurrently with multiple connections. Each connection will download a specific range of a file by defining a range (offset) in the HTTP request header. 
 
@@ -410,7 +410,7 @@ Location: https://s3.amazonaws.com/tickhistory.query.production.hdc-results/xxx/
 
 Then, the application can use this new AWS URL to download the file.
 
-However, when retrieving the HTTP status code 302, the **http** package in Go programming language will automatically redirect to the new URL with the same HTTP headers of the previous request which have fields for TRTH V2 REST API. This causes AWS returning **403 Forbidden** status code.
+However, when retrieving the HTTP status code 302, the **http** package in Go programming language will automatically redirect to the new URL with the same HTTP headers of the previous request which have fields for RTH V2 REST API. This causes AWS returning **403 Forbidden** status code.
 
 To avoid this issue, the application should disable this redirect by using the following code.
 
@@ -422,7 +422,7 @@ client := &http.Client{
     },
 }
 ```
-Then, the application can remove TRTH V2 headers and optionally add its own HTTP headers in the request. Concurrent downloads mentioned in the previous section can also be used with AWS by specifying **Range** header in the request.
+Then, the application can remove RTH V2 headers and optionally add its own HTTP headers in the request. Concurrent downloads mentioned in the previous section can also be used with AWS by specifying **Range** header in the request.
 
 ## Go Get and Run the Example
 **TickHistoryMarketDepthEx.go** is implemented to demonstrate solutions mentioned in this article. It uses **ExtractRaw** endpoint to send **TickHistoryMarketDepthExtractionRequest** to extract normalized legacy level 2 data of IBM.N from 1 Jul 2017 to 23 Aug 2017. All settings are hard-coded. This example supports the following features:
@@ -448,13 +448,13 @@ The optional arguments for this example are:
 To download the example, please run the following command.
 
 ```
-go get github.com/TR-API-Samples/Article.TRTH.Go.REST.trthrest/main
+go get github.com/TR-API-Samples/Article.RTH.Go.REST.rthrest/main
 ```
 
 The example can be run with the following command.
 
 ```
-go run github.com/TR-API-Samples/Article.TRTH.Go.REST.trthrest/main/TickHistoryMarketDepthEx.go -aws -n 4
+go run github.com/TR-API-Samples/Article.RTH.Go.REST.rthrest/main/TickHistoryMarketDepthEx.go -aws -n 4
 ```
 
 The above command runs the example to download the result file from AWS with four concurrent connections. The output is shown below.
@@ -498,7 +498,7 @@ Enter DSS Password: **********
 ## References
 
 * [Go Programming Language](https://golang.org/)
-* [Thomson Reuters Tick History (TRTH) - REST API](https://developers.thomsonreuters.com/thomson-reuters-tick-history-trth/thomson-reuters-tick-history-trth-rest-api)
+* [Refinitiv Tick History (RTH) - REST API](https://developers.refinitiv.com/en/api-catalog/refinitiv-tick-history/refinitiv-tick-history-rth-rest-api)
 * [JavaScript Object Notation](www.json.org/)
 * [Go: Package json](https://golang.org/pkg/encoding/json/)
 * [Go: Package http](https://golang.org/pkg/net/http/) 

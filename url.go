@@ -1,14 +1,14 @@
-package trthrest
+package rthrest
 
-func GetRequestTokenURL(trthapiurl string)(string){
-	return trthapiurl+"Authentication/RequestToken"
+func GetRequestTokenURL(rthapiurl string)(string){
+	return rthapiurl+"Authentication/RequestToken"
 }
-func GetExtractRawURL(trthapiurl string)(string){
-	return trthapiurl+"Extractions/ExtractRaw"
+func GetExtractRawURL(rthapiurl string)(string){
+	return rthapiurl+"Extractions/ExtractRaw"
 }
-func GetReportExtractionFullFileURL(trthapiurl string, extractionId string)(string){
-	return trthapiurl + "Extractions/ReportExtractions('" + extractionId + "')/FullFile"
+func GetReportExtractionFullFileURL(rthapiurl string, extractionId string)(string){
+	return rthapiurl + "Extractions/ReportExtractions('" + extractionId + "')/FullFile"
 }
-func GetRawExtractionResultGetDefaultStreamURL(trthapiurl string, jobId string)(string){
-	return  trthapiurl + "Extractions/RawExtractionResults('" + jobId + "')" + "/$value"
+func GetRawExtractionResultGetDefaultStreamURL(rthapiurl string, jobId string)(string){
+	return  rthapiurl + "Extractions/RawExtractionResults('" + jobId + "')" + "/$value"
 }

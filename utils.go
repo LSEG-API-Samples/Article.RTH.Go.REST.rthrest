@@ -1,4 +1,4 @@
-package trthrest
+package rthrest
 
 import (
 	"bufio"
