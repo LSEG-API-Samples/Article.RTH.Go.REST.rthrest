@@ -46,7 +46,7 @@ type TickHistoryMarketDepthCondition struct {
 type InstrumentIdentifierList struct {
 	//It uses 'json' metadata to change the fieldname from Metadata to @data.type
 	//It uses user-defined 'odata' metadata to define the default value
-	Metadata              string                 `json:"@odata.type" odata:"#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.InstrumentIdentifierList"`
+	Metadata              string                 `json:"@odata.type" odata:"#DataScope.Select.Api.Extractions.ExtractionRequests.InstrumentIdentifierList"`
 	InstrumentIdentifiers []InstrumentIdentifier `json:",omitempty"`
 	//ValidationOptions is defined as pointer because it is optional
 	ValidationOptions                      *InstrumentValidationOptions `json:",omitempty"`
