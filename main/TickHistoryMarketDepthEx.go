@@ -20,7 +20,7 @@ import (
 //Enter username and password here
 var dssUserName = ""
 var dssPassword = ""
-var rthURL = "https://hosted.datascopeapi.reuters.com/RestApi/v1/"
+var rthURL = "https://selectapi.datascope.refinitiv.com/RestApi/v1/"
 
 //GetExtractionIDFromNote : Get Extraction ID number from note in the response
 func GetExtractionIDFromNote(note string) string {
@@ -91,7 +91,7 @@ func main() {
 		"Sample Data",
 	}
 
-	request.IdentifierList.InstrumentIdentifiers = append(request.IdentifierList.InstrumentIdentifiers, rthrest.InstrumentIdentifier{Identifier: "IBM.N", IdentifierType: "Ric"})
+	request.IdentifierList.InstrumentIdentifiers = append(request.IdentifierList.InstrumentIdentifiers, rthrest.InstrumentIdentifier{Identifier: "CARR.PA", IdentifierType: "Ric"})
 	request.IdentifierList.ValidationOptions = &rthrest.InstrumentValidationOptions{AllowHistoricalInstruments: true}
 
 	//Define the HTTP transport and client used by the example
